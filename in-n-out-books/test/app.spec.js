@@ -1,29 +1,36 @@
 const request = require("supertest");
 const app = require("../src/app");
 
-describe("Assignment 4.2 API Tests", () => {
+describe("Chapter 4: API Tests", () => {
 
-  // Should return an array of books
-  it("should return an array of books", async () => {
-    const res = await request(app).get("/api/books");
+  it("should return a 201-status code when adding a new book", async () => {
+    const res = await request(app)
+      .post("/api/books")
+      .send({
+        id: 6,
+        title: "The Lord of the Rings",
+        author: "J.R.R. Tolkien"
+      });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toBeInstanceOf(Array);
+    expect(res.statusCode).toBe(201);
   });
 
-  // Should return a single book
-  it("should return a single book", async () => {
-    const res = await request(app).get("/api/books/1");
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty("id");
-  });
-
-  // Should return 400 if id is not a number
-  it("should return 400 if id is not a number", async () => {
-    const res = await request(app).get("/api/books/abc");
+  it("should return a 400-status code when adding a new book with missing title", async () => {
+    const res = await request(app)
+      .post("/api/books")
+      .send({
+        id: 7,
+        author: "J.R.R. Tolkien"
+      });
 
     expect(res.statusCode).toBe(400);
+  });
+
+  it("should return a 204-status code when deleting a book", async () => {
+    const res = await request(app)
+      .delete("/api/books/1");
+
+    expect(res.statusCode).toBe(204);
   });
 
 });
