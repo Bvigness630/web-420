@@ -1,36 +1,42 @@
 const request = require("supertest");
 const app = require("../src/app");
 
-describe("Chapter 4: API Tests", () => {
+describe("Chapter 5: API Tests", () => {
 
-  it("should return a 201-status code when adding a new book", async () => {
+  it("should update a book and return a 204-status code", async () => {
     const res = await request(app)
-      .post("/api/books")
+      .put("/api/books/1")
       .send({
-        id: 6,
-        title: "The Lord of the Rings",
-        author: "J.R.R. Tolkien"
+        title: "Updated Book Title",
+        author: "Updated Author"
       });
 
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toEqual(204);
   });
 
-  it("should return a 400-status code when adding a new book with missing title", async () => {
+
+  it("should return a 400-status code when using a non-numeric id", async () => {
     const res = await request(app)
-      .post("/api/books")
+      .put("/api/books/foo")
       .send({
-        id: 7,
-        author: "J.R.R. Tolkien"
+        title: "Updated Book Title",
+        author: "Updated Author"
       });
 
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toEqual(400);
+    expect(res.body.message).toEqual("Input must be a number");
   });
 
-  it("should return a 204-status code when deleting a book", async () => {
-    const res = await request(app)
-      .delete("/api/books/1");
 
-    expect(res.statusCode).toBe(204);
+  it("should return a 400-status code when updating a book with a missing title", async () => {
+    const res = await request(app)
+      .put("/api/books/1")
+      .send({
+        author: "Updated Author"
+      });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body.message).toEqual("Bad Request");
   });
 
 });
