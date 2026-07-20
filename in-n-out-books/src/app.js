@@ -1,16 +1,18 @@
 /**
 * Author: Boyd Vigness
-* Date: 7/12/2026
+* Date: 7/19/2026
 * File Name: app.js
 * Description: Express server for the In-N-Out-Books application.
 */
 
 const express = require("express");
+const bcrypt = require("bcryptjs");
 const app = express();
 
 app.use(express.json());
 
 const books = require("../database/books");
+const users = require("../database/users");
 
 
 // Root route
@@ -94,14 +96,12 @@ app.put("/api/books/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
 
-    // Check if id is numeric
     if (isNaN(id)) {
       return res.status(400).json({
         message: "Input must be a number"
       });
     }
 
-    // Check if title exists
     if (!req.body.title) {
       return res.status(400).json({
         message: "Bad Request"
@@ -140,6 +140,44 @@ app.delete("/api/books/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({
       message: err.message
+    });
+  }
+});
+
+
+// POST login authentication route
+app.post("/api/login", (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+
+    if (!email || !password) {
+      throw {
+        status: 400,
+        message: "Bad Request"
+      };
+    }
+
+
+    const user = users.data.find((user) => user.email === email);
+
+
+    if (!user || !bcrypt.compareSync(password, user.password)) {
+      throw {
+        status: 401,
+        message: "Unauthorized"
+      };
+    }
+
+
+    res.status(200).json({
+      message: "Authentication successful"
+    });
+
+
+  } catch (err) {
+    res.status(err.status || 500).json({
+      message: err.message || "Internal Server Error"
     });
   }
 });
